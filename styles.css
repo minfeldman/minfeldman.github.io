@@ -1,0 +1,138 @@
+body {
+    font-family: 'Work Sans', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 10px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.profile-pic {
+    margin-right: 10px;
+}
+
+.profile-pic img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.profile-info {
+    text-align: left;
+}
+
+.name {
+    font-size: 24px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.profile-info p {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.cv-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.about-section, .research-section, .experience-section {
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 20px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.description-box {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-left-width: 3px;
+    border-radius: 4px;
+    background-color: #fcfcfc;
+}
+
+.description-box p:last-child {
+    margin-bottom: 0;
+}
+
+.description-box p {
+    margin: 0 0 3px;
+    line-height: 1.5;
+}
+
+.callout-box {
+    background-color: #ffe6f2;
+    padding: 8px 10px;
+    margin-top: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.experience-section {
+    margin-top: 15px;
+}
+
+.job-entry {
+    margin-bottom: 8px;
+}
+
+.job-entry:last-child {
+    margin-bottom: 0;
+}
+
+.job-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 3px;
+    color: #333;
+}
+
+.company-name {
+    font-size: 16px;
+    margin: 0 0 3px;
+    color: #555;
+}
+
+.time-frame {
+    font-size: 14px;
+    color: #777;
+    margin: 0 0 3px;
+}
+
+.job-link {
+    font-size: 14px;
+    color: #ff66b2;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.job-link:hover {
+    color: #cc0052;
+    text-decoration: underline;
+}
+
+.email-link {
+    color: #ff66b2;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+.email-link:hover {
+    color: #cc0052;
+    text-decoration: underline;
+}
