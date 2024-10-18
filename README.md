@@ -1,7 +1,7 @@
-# Min Feldman - Portfolio
+# min feldman, portfolio
 
-Portfolio website for Min Feldman, a psychology student at The Ohio State University.
+portfolio website for min yeshara feldman, a psychology student at the ohio state university! 
 
-## Contact
+## contact
 
-Feel free to reach out to me via [feldman.307@osu.edu](mailto:feldman.307@osu.edu) or connect with me on [LinkedIn](https://www.linkedin.com/in/minfeldman/).
+feel free to reach out to me via [feldman.307@osu.edu](mailto:feldman.307@osu.edu) or connect with me on [LinkedIn](https://www.linkedin.com/in/minfeldman/).
