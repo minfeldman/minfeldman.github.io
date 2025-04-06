@@ -1,5 +1,5 @@
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Century Schoolbook', serif;
     background-color: #ffffff;
     margin: 0;
     padding: 10px;
@@ -135,4 +135,59 @@ body {
 .email-link:hover {
     color: #cc0052;
     text-decoration: underline;
+}
+
+/* Sparkle Styling */
+
+.sparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+    animation: sparkle-animation 0.6s ease-in-out forwards;
+}
+
+.sparkle:before, .sparkle:after {
+    content: "";
+    position: absolute;
+    background-color: #ffcce6; /* baby pink color */
+}
+
+/* Vertical line of sparkle */
+.sparkle:before {
+    width: 2px;
+    height: 12px;
+    left: 5px;
+    top: 0px;
+}
+
+/* Horizontal line of sparkle */
+.sparkle:after {
+    width: 12px;
+    height: 2px;
+    left: 0px;
+    top: 5px;
+}
+
+@keyframes sparkle-animation {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1) rotate(45deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0) rotate(90deg);
+        opacity: 0;
+    }
+}
+
+@font-face {
+    font-family: 'Century Schoolbook';
+    src: url('fonts/schoolbook.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
 }
