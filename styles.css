@@ -1,3 +1,7 @@
+html {
+    overflow-y: scroll;
+}
+
 body {
     font-family: 'Century Schoolbook', serif;
     background-color: #ffffff;
@@ -190,4 +194,31 @@ body {
     src: url('fonts/schoolbook.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
+}
+
+.nav-bar {
+    display: flex;
+    justify-content: flex-start;
+    gap: 24px;
+    margin: 18px 0 10px 0;
+    font-size: 18px;
+}
+
+.nav-link {
+    color: #ff66b2;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #cc0052;
+    text-decoration: underline;
+}
+
+.nav-active {
+    border-bottom: 2px solid #ff66b2;
+    cursor: default;
+    pointer-events: none;
 }
