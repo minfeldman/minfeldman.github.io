@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strawberry Ball</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .ball-box {
+            width: 800px;
+            height: 500px;
+            background: #fff;
+            border: 2px solid #ff66b2;
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(255,102,178,0.08);
+            position: relative;
+            overflow: hidden;
+            margin: 48px auto 0 auto;
+        }
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-section">
+            <div class="profile-pic">
+                <img src="../pfp.jpeg" alt="min yeshara feldman" style="border-radius: 50%; width: 120px; height: 120px; user-select: none;" ondragstart="return false;">
+            </div>
+            <div class="profile-info">
+                <h2 class="name">min yeshara feldman <a href="../mf_cv.pdf" class="cv-link" style="font-size: medium;" target="_blank">[cv]</a></h2>
+                <p>psychology student, undergraduate researcher</p>
+            </div>
+        </div>
+        <hr style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
+        <div class="nav-bar">
+            <a href="../index.html" class="nav-link">about</a>
+            <a href="../research/" class="nav-link">research</a>
+            <a href="../fun/" class="nav-link">fun</a>
+            <span class="nav-link nav-active">strawberry</span>
+        </div>
+        <div class="center-content">
+            <div class="ball-box" id="ball-box"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"
+          }
+        }
+        </script>
+    <script type="module" src="strawberry-ball.js"></script>
+</body>
+</html> 
