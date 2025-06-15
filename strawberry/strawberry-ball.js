@@ -1,47 +1,39 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// Three.js ball in a box
+// Scene setup
 const box = document.getElementById('ball-box');
 const boxWidth = box.clientWidth;
 const boxHeight = box.clientHeight;
 
-// Responsive handling
 function updateSize() {
     const newWidth = box.clientWidth;
     const newHeight = box.clientHeight;
     
-    // Update camera
     camera.left = -newWidth / 2;
     camera.right = newWidth / 2;
     camera.top = newHeight / 2;
     camera.bottom = -newHeight / 2;
     camera.updateProjectionMatrix();
     
-    // Update renderer
     renderer.setSize(newWidth, newHeight);
     
-    // Update physics bounds
     const floorY = -newHeight / 2 + radius;
     const ceilingY = newHeight / 2 - radius;
     const leftWall = -newWidth / 2 + radius;
     const rightWall = newWidth / 2 - radius;
     
-    // Ensure ball stays within bounds
     if (ballGroup) {
         ballGroup.position.x = Math.max(leftWall, Math.min(rightWall, ballGroup.position.x));
         ballGroup.position.y = Math.max(floorY, Math.min(ceilingY, ballGroup.position.y));
     }
 }
 
-// Add resize listener
 window.addEventListener('resize', updateSize);
 
-// Scene setup
 const scene = new THREE.Scene();
-scene.background = null; // Transparent background
+scene.background = null;
 
-// Camera setup - adjusted for better view
 const camera = new THREE.OrthographicCamera(
     -boxWidth / 2, boxWidth / 2,
     boxHeight / 2, -boxHeight / 2,
@@ -49,7 +41,6 @@ const camera = new THREE.OrthographicCamera(
 );
 camera.position.z = 100;
 
-// Renderer setup
 const renderer = new THREE.WebGLRenderer({ 
     alpha: true,
     antialias: true
@@ -57,12 +48,11 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(boxWidth, boxHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.outputColorSpace = THREE.SRGBColorSpace; // Correct color space for textures
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 box.appendChild(renderer.domElement);
 
-// Lighting setup - improved for better texture visibility
 const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
 scene.add(ambientLight);
 
@@ -71,15 +61,14 @@ directionalLight.position.set(10, 10, 10);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-// Add a subtle fill light to prevent harsh shadows
 const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
 fillLight.position.set(-5, -5, 5);
 scene.add(fillLight);
 
-// Physics variables
-const radius = 40;
+// Physics setup
+const radius = 50;
 let ball = null;
-let ballGroup = null; // Group to handle positioning
+let ballGroup = null;
 let vy = 0;
 let vx = (Math.random() - 0.5) * 6;
 const gravity = -0.5;
@@ -87,78 +76,50 @@ const bounce = 0.7;
 const friction = 0.98;
 const restThreshold = 0.5;
 
-// Create a group for the ball (makes positioning easier)
 ballGroup = new THREE.Group();
 scene.add(ballGroup);
 
-// Texture loader
 const textureLoader = new THREE.TextureLoader();
-
-// GLTF Loader
 const loader = new GLTFLoader();
+
 loader.load(
     'berry/scene.gltf',
     function (gltf) {
         ball = gltf.scene;
         
-        // Traverse the model to ensure materials are set up correctly
         ball.traverse((child) => {
             if (child.isMesh) {
-                // Enable shadows
                 child.castShadow = true;
                 child.receiveShadow = true;
                 
-                // If the model doesn't have textures, you can manually apply them
-                // Uncomment and adjust the following if needed:
-                /*
-                if (!child.material.map) {
-                    textureLoader.load('model/strawberry_texture.jpg', (texture) => {
-                        texture.colorSpace = THREE.SRGBColorSpace;
-                        child.material.map = texture;
-                        child.material.needsUpdate = true;
-                    });
-                }
-                */
-                
-                // Ensure the material responds to lights
                 if (child.material) {
                     child.material.needsUpdate = true;
                 }
             }
         });
         
-        // Calculate the bounding box to get actual size
         const box = new THREE.Box3().setFromObject(ball);
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
         
-        // Scale to match desired radius
         const scale = (radius * 2) / maxDim;
         ball.scale.set(scale, scale, scale);
         
-        // Center the model
         const center = box.getCenter(new THREE.Vector3());
         ball.position.sub(center.multiplyScalar(scale));
         
-        // Add to group
         ballGroup.add(ball);
         
-        // Set initial position (adjust for coordinate system)
         ballGroup.position.x = radius + Math.random() * (boxWidth - 2 * radius) - boxWidth / 2;
         ballGroup.position.y = radius - boxHeight / 2;
         ballGroup.position.z = 0;
-        
-        console.log('Strawberry model loaded successfully');
     },
-    // Progress callback
     function (xhr) {
         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     },
-    // Error callback
     function (error) {
         console.error('Error loading strawberry model:', error);
         
-        // Fallback: Create a simple sphere with strawberry-like appearance
         const geometry = new THREE.SphereGeometry(radius, 32, 32);
         const material = new THREE.MeshPhongMaterial({
             color: 0xff4444,
@@ -306,20 +267,17 @@ function animate() {
         ballGroup.position.y += vy;
         ballGroup.position.x += vx;
         
-        // Rotation for rolling effect
         if (ball && Math.abs(vx) > 0.1) {
             ball.rotation.z -= vx * 0.02;
-            ball.rotation.x -= vx * 0.01; // Add some tumbling
+            ball.rotation.x -= vx * 0.01;
         }
     }
 
-    // Get current bounds
     const floorY = -boxHeight / 2 + radius;
     const ceilingY = boxHeight / 2 - radius;
     const leftWall = -boxWidth / 2 + radius;
     const rightWall = boxWidth / 2 - radius;
 
-    // Floor bounce (adjusted for centered coordinates)
     if (ballGroup.position.y < floorY) {
         ballGroup.position.y = floorY;
         vy *= -bounce;
@@ -332,13 +290,11 @@ function animate() {
         }
     }
     
-    // Ceiling bounce
     if (ballGroup.position.y > ceilingY) {
         ballGroup.position.y = ceilingY;
         vy *= -bounce;
     }
     
-    // Wall bounces
     if (ballGroup.position.x < leftWall) {
         ballGroup.position.x = leftWall;
         vx *= -bounce;
