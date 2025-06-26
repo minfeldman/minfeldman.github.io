@@ -22,6 +22,66 @@
             margin: 48px auto 0 auto;
         }
         
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ffe6f2 25%, #ffb3d9 25%, #ffb3d9 50%, #ffe6f2 50%, #ffe6f2 75%, #ffb3d9 75%, #ffb3d9);
+            background-size: 40px 40px;
+            animation: loading-stripes 1.5s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 22px;
+        }
+        
+        @keyframes loading-stripes {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 40px 40px;
+            }
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: #ff66b2;
+            font-family: 'Century Schoolbook', serif;
+        }
+        
+        .loading-emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
         .center-content {
             display: flex;
             flex-direction: column;
@@ -69,6 +129,18 @@
             .center-content {
                 min-height: 300px;
             }
+            
+            .loading-emoji {
+                font-size: 36px;
+            }
+            
+            .loading-text {
+                font-size: 16px;
+            }
+            
+            .loading-subtext {
+                font-size: 12px;
+            }
         }
         
         @media (max-width: 400px) {
@@ -101,7 +173,14 @@
             <span class="nav-link nav-active">fruits</span>
         </div>
         <div class="center-content">
-            <div class="ball-box" id="ball-box"></div>
+            <div class="ball-box" id="ball-box">
+                <div class="loading-screen" id="loading-screen">
+                    <div class="loading-content" style="background-color: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 10px;">
+                        <div class="loading-emoji">🍎🍓</div>
+                        <div class="loading-text">Loading fruits...</div>
+                    </div>
+                </div>
+            </div>
             <div class="small-screen-message">
                 <div class="emoji">🍎🍓</div>
                 <h3>Fruits need more space!</h3>

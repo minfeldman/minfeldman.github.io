@@ -3,8 +3,23 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Scene setup
 const box = document.getElementById('ball-box');
+const loadingScreen = document.getElementById('loading-screen');
 let boxWidth = box.clientWidth;
 let boxHeight = box.clientHeight;
+
+// Loading state tracking
+let modelsLoaded = 0;
+const totalModels = 2; // apple and strawberry
+
+function hideLoadingScreen() {
+    if (loadingScreen) {
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.5s ease-out';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }
+}
 
 function updateSize() {
     const newWidth = box.clientWidth;
@@ -170,6 +185,13 @@ function loadModel(ballData, index) {
             ballData.group.position.z = 0;
             
             console.log(`${ballData.id} loaded and centered. Final radius should be: ${radius}`);
+            
+            // Track loading progress
+            modelsLoaded++;
+            if (modelsLoaded >= totalModels) {
+                // Add a small delay to ensure everything is ready
+                setTimeout(hideLoadingScreen, 500);
+            }
         },
         function (xhr) {
             console.log(`${ballData.id}: ${(xhr.loaded / xhr.total * 100)}% loaded`);
@@ -199,6 +221,13 @@ function loadModel(ballData, index) {
             const spacing = radius * 3;
             ballData.group.position.x = (index - 0.5) * spacing;
             ballData.group.position.y = radius - boxHeight / 2;
+            
+            // Track loading progress even for fallback models
+            modelsLoaded++;
+            if (modelsLoaded >= totalModels) {
+                // Add a small delay to ensure everything is ready
+                setTimeout(hideLoadingScreen, 500);
+            }
         }
     );
 }
