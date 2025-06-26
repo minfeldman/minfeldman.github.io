@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .ball-box {
-            width: 800px;
+            width: 100%;
+            max-width: 800px;
             height: 500px;
             background: #fff;
             border: 2px solid #ff66b2;
@@ -20,12 +21,64 @@
             overflow: hidden;
             margin: 48px auto 0 auto;
         }
+        
         .center-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 400px;
+        }
+        
+        .small-screen-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: #fff;
+            border: 2px solid #ff66b2;
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(255,102,178,0.08);
+            margin: 48px auto 0 auto;
+            max-width: 400px;
+        }
+        
+        .small-screen-message h3 {
+            color: #ff66b2;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .small-screen-message p {
+            color: #666;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .small-screen-message .emoji {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .ball-box {
+                height: 400px;
+                margin: 24px auto 0 auto;
+            }
+            
+            .center-content {
+                min-height: 300px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .ball-box {
+                display: none;
+            }
+            
+            .small-screen-message {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -49,6 +102,11 @@
         </div>
         <div class="center-content">
             <div class="ball-box" id="ball-box"></div>
+            <div class="small-screen-message">
+                <div class="emoji">🍎🍓</div>
+                <h3>Fruits need more space!</h3>
+                <p>The fruits look best on wider screens. Try rotating your device or using a larger screen!</p>
+            </div>
         </div>
     </div>
     

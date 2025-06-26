@@ -3,12 +3,16 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Scene setup
 const box = document.getElementById('ball-box');
-const boxWidth = box.clientWidth;
-const boxHeight = box.clientHeight;
+let boxWidth = box.clientWidth;
+let boxHeight = box.clientHeight;
 
 function updateSize() {
     const newWidth = box.clientWidth;
     const newHeight = box.clientHeight;
+    
+    // Update stored dimensions
+    boxWidth = newWidth;
+    boxHeight = newHeight;
     
     camera.left = -newWidth / 2;
     camera.right = newWidth / 2;
@@ -31,7 +35,16 @@ function updateSize() {
     });
 }
 
+// Listen for both window resize and container size changes
 window.addEventListener('resize', updateSize);
+
+// Use ResizeObserver to detect container size changes
+if (window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver(() => {
+        updateSize();
+    });
+    resizeObserver.observe(box);
+}
 
 const scene = new THREE.Scene();
 scene.background = null;

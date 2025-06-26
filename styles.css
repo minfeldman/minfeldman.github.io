@@ -12,6 +12,74 @@ body {
 .container {
     max-width: 800px;
     margin: 0 auto;
+    padding: 0 10px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 850px) {
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+    
+    .nav-bar {
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 16px;
+    }
+    
+    .name {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+    
+    .nav-bar {
+        gap: 12px;
+        font-size: 14px;
+    }
+    
+    .name {
+        font-size: 18px;
+    }
+    
+    .profile-pic img {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Only change profile layout to column on very small screens */
+@media (max-width: 350px) {
+    .profile-section {
+        flex-direction: column;
+        text-align: left;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .profile-pic {
+        margin-right: 0;
+        align-self: flex-start;
+    }
+    
+    .profile-pic img {
+        width: 80px !important;
+        height: 80px !important;
+        display: block;
+    }
+    
+    .profile-info {
+        align-self: flex-start;
+    }
 }
 
 .profile-section {
