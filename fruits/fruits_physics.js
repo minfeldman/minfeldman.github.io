@@ -102,6 +102,84 @@ const bounce = 0.7;
 const friction = 0.98;
 const restThreshold = 0.5;
 
+// Command framework
+const fruitCommands = {
+    // Clear all fruits from the scene
+    clearScene: function() {
+        balls.forEach(ballData => {
+            if (ballData.group) {
+                scene.remove(ballData.group);
+                ballData.group = null;
+                ballData.model = null;
+                ballData.modelWrapper = null;
+            }
+        });
+        balls.length = 0; // Clear the array
+    },
+    
+    // Create multiple fruits of a specific type
+    createFruits: function(type, count, customRadius = null) {
+        const fruitRadius = customRadius || radius;
+        
+        for (let i = 0; i < count; i++) {
+            const ballData = {
+                id: type,
+                model: null,
+                group: null,
+                modelWrapper: null,
+                vx: (Math.random() - 0.5) * 6,
+                vy: 0,
+                color: type === 'strawberry' ? 0xff4444 : 0x44ff44,
+                modelPath: type === 'strawberry' ? 'berry/scene.gltf' : 'apple/scene.gltf',
+                radius: fruitRadius
+            };
+            
+            // Create group and add to scene
+            ballData.group = new THREE.Group();
+            scene.add(ballData.group);
+            
+            // Load the model with custom radius
+            loadModelWithRadius(ballData, fruitRadius, i);
+            
+            // Add to balls array
+            balls.push(ballData);
+        }
+    },
+    
+    // Command: minnie - creates 30 of each fruit with smaller radius
+    minnie: function() {
+        this.clearScene();
+        
+        // Show loading screen
+        if (loadingScreen) {
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+        }
+        
+        // Reset loading state
+        modelsLoaded = 0;
+        
+        this.createFruits('strawberry', 30, 25); // Half the normal radius
+        this.createFruits('apple', 30, 25);
+        
+        return `Created 10 strawberries and 10 apples with smaller radius (25px)`;
+    },
+    
+    // Command: help - shows available commands
+    help: function() {
+        return `Available commands:
+• minnie - Creates 10 strawberries and 10 apples with smaller radius
+• help - Shows this help message
+• clear - Clears all fruits from the scene`;
+    },
+    
+    // Command: clear - clears the scene
+    clear: function() {
+        this.clearScene();
+        return `Cleared all fruits from the scene`;
+    }
+};
+
 // Ball data structure
 const balls = [
     {
@@ -242,7 +320,11 @@ function checkBallCollision(ball1, ball2) {
     const dx = ball1.group.position.x - ball2.group.position.x;
     const dy = ball1.group.position.y - ball2.group.position.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const minDistance = radius * 2;
+    
+    // Get radius for each ball (default to global radius if not specified)
+    const radius1 = ball1.radius || radius;
+    const radius2 = ball2.radius || radius;
+    const minDistance = radius1 + radius2;
     
     if (distance < minDistance && distance > 0) {
         // Normalize the collision vector
@@ -323,11 +405,12 @@ function getSceneCoords(e) {
 function getBallAtPosition(sceneX, sceneY) {
     for (let ballData of balls) {
         if (!ballData.group) continue;
+        const ballRadius = ballData.radius || radius;
         const dist = Math.hypot(
             sceneX - ballData.group.position.x,
             sceneY - ballData.group.position.y
         );
-        if (dist <= radius) {
+        if (dist <= ballRadius) {
             return ballData;
         }
     }
@@ -445,14 +528,15 @@ function animate() {
         }
     }
 
-    const floorY = -boxHeight / 2 + radius;
-    const ceilingY = boxHeight / 2 - radius;
-    const leftWall = -boxWidth / 2 + radius;
-    const rightWall = boxWidth / 2 - radius;
-
     // Check wall collisions for each ball
     balls.forEach(ballData => {
         if (!ballData.group) return;
+        
+        const ballRadius = ballData.radius || radius;
+        const floorY = -boxHeight / 2 + ballRadius;
+        const ceilingY = boxHeight / 2 - ballRadius;
+        const leftWall = -boxWidth / 2 + ballRadius;
+        const rightWall = boxWidth / 2 - ballRadius;
 
         if (ballData.group.position.y < floorY) {
             ballData.group.position.y = floorY;
@@ -484,3 +568,122 @@ function animate() {
 }
 
 animate();
+
+// Load model with custom radius
+function loadModelWithRadius(ballData, customRadius, index) {
+    loader.load(
+        ballData.modelPath,
+        function (gltf) {
+            ballData.model = gltf.scene;
+            
+            ballData.model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    if (child.material) {
+                        child.material.needsUpdate = true;
+                    }
+                }
+            });
+            
+            // First, get the original bounding box
+            const originalBox = new THREE.Box3().setFromObject(ballData.model);
+            const originalSize = originalBox.getSize(new THREE.Vector3());
+            const maxDim = Math.max(originalSize.x, originalSize.y, originalSize.z);
+            
+            // Scale the model with custom radius
+            const scale = (customRadius * 2) / maxDim;
+            ballData.model.scale.set(scale, scale, scale);
+            
+            // IMPORTANT: Recalculate bounding box AFTER scaling
+            ballData.model.updateMatrixWorld(true);
+            const scaledBox = new THREE.Box3().setFromObject(ballData.model);
+            const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+            
+            // Center the model at origin by moving it
+            ballData.model.position.sub(scaledCenter);
+            
+            // Create a wrapper group to ensure clean pivot point
+            const modelWrapper = new THREE.Group();
+            modelWrapper.add(ballData.model);
+            ballData.group.add(modelWrapper);
+            
+            // Store reference to wrapper for easier access
+            ballData.modelWrapper = modelWrapper;
+            
+            // Position fruits randomly within the container
+            const spacing = customRadius * 2;
+            const maxX = boxWidth / 2 - customRadius;
+            const maxY = boxHeight / 2 - customRadius;
+            
+            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            ballData.group.position.z = 0;
+            
+            console.log(`${ballData.id} ${index + 1} loaded with radius: ${customRadius}`);
+            
+            // Track loading progress for spawned fruits
+            modelsLoaded++;
+            if (modelsLoaded >= balls.length) {
+                // Hide loading screen when all spawned fruits are loaded
+                setTimeout(() => {
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500);
+            }
+        },
+        function (xhr) {
+            console.log(`${ballData.id} ${index + 1}: ${(xhr.loaded / xhr.total * 100)}% loaded`);
+        },
+        function (error) {
+            console.error(`Error loading ${ballData.id} ${index + 1} model:`, error);
+            
+            // Create fallback sphere
+            const geometry = new THREE.SphereGeometry(customRadius, 32, 32);
+            const material = new THREE.MeshPhongMaterial({
+                color: ballData.color,
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            
+            ballData.model = new THREE.Mesh(geometry, material);
+            ballData.model.castShadow = true;
+            ballData.model.receiveShadow = true;
+            
+            // Center the fallback sphere as well
+            const modelWrapper = new THREE.Group();
+            modelWrapper.add(ballData.model);
+            ballData.group.add(modelWrapper);
+            ballData.modelWrapper = modelWrapper;
+            
+            // Position randomly
+            const maxX = boxWidth / 2 - customRadius;
+            const maxY = boxHeight / 2 - customRadius;
+            
+            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            
+            // Track loading progress for fallback models too
+            modelsLoaded++;
+            if (modelsLoaded >= balls.length) {
+                // Hide loading screen when all spawned fruits are loaded
+                setTimeout(() => {
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500);
+            }
+        }
+    );
+}
+
+// Expose commands globally for console access
+window.fruitCommands = fruitCommands;
