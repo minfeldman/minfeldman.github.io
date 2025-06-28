@@ -104,7 +104,6 @@ const restThreshold = 0.5;
 
 // Command framework
 const fruitCommands = {
-    // Clear all fruits from the scene
     clearScene: function() {
         balls.forEach(ballData => {
             if (ballData.group) {
@@ -114,10 +113,9 @@ const fruitCommands = {
                 ballData.modelWrapper = null;
             }
         });
-        balls.length = 0; // Clear the array
+        balls.length = 0;
     },
     
-    // Create multiple fruits of a specific type
     createFruits: function(type, count, customRadius = null) {
         const fruitRadius = customRadius || radius;
         
@@ -134,49 +132,60 @@ const fruitCommands = {
                 radius: fruitRadius
             };
             
-            // Create group and add to scene
             ballData.group = new THREE.Group();
             scene.add(ballData.group);
             
-            // Load the model with custom radius
             loadModelWithRadius(ballData, fruitRadius, i);
-            
-            // Add to balls array
             balls.push(ballData);
         }
     },
     
-    // Command: minnie - creates 30 of each fruit with smaller radius
     minnie: function() {
         this.clearScene();
         
-        // Show loading screen
         if (loadingScreen) {
             loadingScreen.style.display = 'flex';
             loadingScreen.style.opacity = '1';
         }
         
-        // Reset loading state
         modelsLoaded = 0;
         
-        this.createFruits('strawberry', 30, 25); // Half the normal radius
+        this.createFruits('strawberry', 30, 25);
         this.createFruits('apple', 30, 25);
         
-        return `Created 10 strawberries and 10 apples with smaller radius (25px)`;
+        return `Created 30 strawberries and 30 apples with smaller radius (25px)`;
     },
     
-    // Command: help - shows available commands
-    help: function() {
-        return `Available commands:
-• minnie - Creates 10 strawberries and 10 apples with smaller radius
-• help - Shows this help message
-• clear - Clears all fruits from the scene`;
-    },
-    
-    // Command: clear - clears the scene
     clear: function() {
         this.clearScene();
         return `Cleared all fruits from the scene`;
+    },
+    
+    explode: function() {
+        const centerX = 0;
+        const centerY = -boxHeight / 2 - 50;
+        
+        balls.forEach(ballData => {
+            if (!ballData.group) return;
+            
+            const dx = ballData.group.position.x - centerX;
+            const dy = ballData.group.position.y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 0) {
+                const nx = dx / distance;
+                const ny = dy / distance;
+                
+                const baseForce = 25;
+                const distanceMultiplier = Math.min(distance * 0.3, 10);
+                const totalForce = baseForce + distanceMultiplier;
+                
+                ballData.vx += nx * totalForce;
+                ballData.vy += ny * totalForce;
+            }
+        });
+        
+        return `Exploded ${balls.length} fruits from below!`;
     }
 };
 
@@ -321,17 +330,14 @@ function checkBallCollision(ball1, ball2) {
     const dy = ball1.group.position.y - ball2.group.position.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Get radius for each ball (default to global radius if not specified)
     const radius1 = ball1.radius || radius;
     const radius2 = ball2.radius || radius;
     const minDistance = radius1 + radius2;
     
     if (distance < minDistance && distance > 0) {
-        // Normalize the collision vector
         const nx = dx / distance;
         const ny = dy / distance;
         
-        // Separate the balls to prevent overlap
         const overlap = minDistance - distance;
         const separationX = nx * overlap * 0.5;
         const separationY = ny * overlap * 0.5;
@@ -341,26 +347,21 @@ function checkBallCollision(ball1, ball2) {
         ball2.group.position.x -= separationX;
         ball2.group.position.y -= separationY;
         
-        // Calculate relative velocity
         const relativeVx = ball1.vx - ball2.vx;
         const relativeVy = ball1.vy - ball2.vy;
         
-        // Calculate relative velocity in collision normal direction
         const speed = relativeVx * nx + relativeVy * ny;
         
-        // Do not resolve if velocities are separating
         if (speed > 0) return;
         
-        // Apply collision response (elastic collision with some energy loss)
         const restitution = 0.8;
-        const impulse = 2 * speed * restitution / 2; // assuming equal mass
+        const impulse = 2 * speed * restitution / 2;
         
         ball1.vx -= impulse * nx;
         ball1.vy -= impulse * ny;
         ball2.vx += impulse * nx;
         ball2.vy += impulse * ny;
         
-        // Add some rotation based on collision
         if (ball1.modelWrapper) {
             ball1.modelWrapper.rotation.z += (ball2.vx - ball1.vx) * 0.005;
         }
@@ -587,33 +588,25 @@ function loadModelWithRadius(ballData, customRadius, index) {
                 }
             });
             
-            // First, get the original bounding box
             const originalBox = new THREE.Box3().setFromObject(ballData.model);
             const originalSize = originalBox.getSize(new THREE.Vector3());
             const maxDim = Math.max(originalSize.x, originalSize.y, originalSize.z);
             
-            // Scale the model with custom radius
             const scale = (customRadius * 2) / maxDim;
             ballData.model.scale.set(scale, scale, scale);
             
-            // IMPORTANT: Recalculate bounding box AFTER scaling
             ballData.model.updateMatrixWorld(true);
             const scaledBox = new THREE.Box3().setFromObject(ballData.model);
             const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
             
-            // Center the model at origin by moving it
             ballData.model.position.sub(scaledCenter);
             
-            // Create a wrapper group to ensure clean pivot point
             const modelWrapper = new THREE.Group();
             modelWrapper.add(ballData.model);
             ballData.group.add(modelWrapper);
             
-            // Store reference to wrapper for easier access
             ballData.modelWrapper = modelWrapper;
             
-            // Position fruits randomly within the container
-            const spacing = customRadius * 2;
             const maxX = boxWidth / 2 - customRadius;
             const maxY = boxHeight / 2 - customRadius;
             
@@ -623,10 +616,8 @@ function loadModelWithRadius(ballData, customRadius, index) {
             
             console.log(`${ballData.id} ${index + 1} loaded with radius: ${customRadius}`);
             
-            // Track loading progress for spawned fruits
             modelsLoaded++;
             if (modelsLoaded >= balls.length) {
-                // Hide loading screen when all spawned fruits are loaded
                 setTimeout(() => {
                     if (loadingScreen) {
                         loadingScreen.style.opacity = '0';
@@ -655,23 +646,19 @@ function loadModelWithRadius(ballData, customRadius, index) {
             ballData.model.castShadow = true;
             ballData.model.receiveShadow = true;
             
-            // Center the fallback sphere as well
             const modelWrapper = new THREE.Group();
             modelWrapper.add(ballData.model);
             ballData.group.add(modelWrapper);
             ballData.modelWrapper = modelWrapper;
             
-            // Position randomly
             const maxX = boxWidth / 2 - customRadius;
             const maxY = boxHeight / 2 - customRadius;
             
             ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
             ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
             
-            // Track loading progress for fallback models too
             modelsLoaded++;
             if (modelsLoaded >= balls.length) {
-                // Hide loading screen when all spawned fruits are loaded
                 setTimeout(() => {
                     if (loadingScreen) {
                         loadingScreen.style.opacity = '0';
