@@ -102,6 +102,93 @@ const bounce = 0.7;
 const friction = 0.98;
 const restThreshold = 0.5;
 
+// Command framework
+const fruitCommands = {
+    clearScene: function() {
+        balls.forEach(ballData => {
+            if (ballData.group) {
+                scene.remove(ballData.group);
+                ballData.group = null;
+                ballData.model = null;
+                ballData.modelWrapper = null;
+            }
+        });
+        balls.length = 0;
+    },
+    
+    createFruits: function(type, count, customRadius = null) {
+        const fruitRadius = customRadius || radius;
+        
+        for (let i = 0; i < count; i++) {
+            const ballData = {
+                id: type,
+                model: null,
+                group: null,
+                modelWrapper: null,
+                vx: (Math.random() - 0.5) * 6,
+                vy: 0,
+                color: type === 'strawberry' ? 0xff4444 : 0x44ff44,
+                modelPath: type === 'strawberry' ? 'berry/scene.gltf' : 'apple/scene.gltf',
+                radius: fruitRadius
+            };
+            
+            ballData.group = new THREE.Group();
+            scene.add(ballData.group);
+            
+            loadModelWithRadius(ballData, fruitRadius, i);
+            balls.push(ballData);
+        }
+    },
+    
+    minnie: function() {
+        this.clearScene();
+        
+        if (loadingScreen) {
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+        }
+        
+        modelsLoaded = 0;
+        
+        this.createFruits('strawberry', 30, 25);
+        this.createFruits('apple', 30, 25);
+        
+        return `Created 30 strawberries and 30 apples with smaller radius (25px)`;
+    },
+    
+    clear: function() {
+        this.clearScene();
+        return `Cleared all fruits from the scene`;
+    },
+    
+    explode: function() {
+        const centerX = 0;
+        const centerY = -boxHeight / 2 - 50;
+        
+        balls.forEach(ballData => {
+            if (!ballData.group) return;
+            
+            const dx = ballData.group.position.x - centerX;
+            const dy = ballData.group.position.y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 0) {
+                const nx = dx / distance;
+                const ny = dy / distance;
+                
+                const baseForce = 25;
+                const distanceMultiplier = Math.min(distance * 0.3, 10);
+                const totalForce = baseForce + distanceMultiplier;
+                
+                ballData.vx += nx * totalForce;
+                ballData.vy += ny * totalForce;
+            }
+        });
+        
+        return `Exploded ${balls.length} fruits from below!`;
+    }
+};
+
 // Ball data structure
 const balls = [
     {
@@ -242,14 +329,15 @@ function checkBallCollision(ball1, ball2) {
     const dx = ball1.group.position.x - ball2.group.position.x;
     const dy = ball1.group.position.y - ball2.group.position.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const minDistance = radius * 2;
+    
+    const radius1 = ball1.radius || radius;
+    const radius2 = ball2.radius || radius;
+    const minDistance = radius1 + radius2;
     
     if (distance < minDistance && distance > 0) {
-        // Normalize the collision vector
         const nx = dx / distance;
         const ny = dy / distance;
         
-        // Separate the balls to prevent overlap
         const overlap = minDistance - distance;
         const separationX = nx * overlap * 0.5;
         const separationY = ny * overlap * 0.5;
@@ -259,26 +347,21 @@ function checkBallCollision(ball1, ball2) {
         ball2.group.position.x -= separationX;
         ball2.group.position.y -= separationY;
         
-        // Calculate relative velocity
         const relativeVx = ball1.vx - ball2.vx;
         const relativeVy = ball1.vy - ball2.vy;
         
-        // Calculate relative velocity in collision normal direction
         const speed = relativeVx * nx + relativeVy * ny;
         
-        // Do not resolve if velocities are separating
         if (speed > 0) return;
         
-        // Apply collision response (elastic collision with some energy loss)
         const restitution = 0.8;
-        const impulse = 2 * speed * restitution / 2; // assuming equal mass
+        const impulse = 2 * speed * restitution / 2;
         
         ball1.vx -= impulse * nx;
         ball1.vy -= impulse * ny;
         ball2.vx += impulse * nx;
         ball2.vy += impulse * ny;
         
-        // Add some rotation based on collision
         if (ball1.modelWrapper) {
             ball1.modelWrapper.rotation.z += (ball2.vx - ball1.vx) * 0.005;
         }
@@ -323,11 +406,12 @@ function getSceneCoords(e) {
 function getBallAtPosition(sceneX, sceneY) {
     for (let ballData of balls) {
         if (!ballData.group) continue;
+        const ballRadius = ballData.radius || radius;
         const dist = Math.hypot(
             sceneX - ballData.group.position.x,
             sceneY - ballData.group.position.y
         );
-        if (dist <= radius) {
+        if (dist <= ballRadius) {
             return ballData;
         }
     }
@@ -445,14 +529,15 @@ function animate() {
         }
     }
 
-    const floorY = -boxHeight / 2 + radius;
-    const ceilingY = boxHeight / 2 - radius;
-    const leftWall = -boxWidth / 2 + radius;
-    const rightWall = boxWidth / 2 - radius;
-
     // Check wall collisions for each ball
     balls.forEach(ballData => {
         if (!ballData.group) return;
+        
+        const ballRadius = ballData.radius || radius;
+        const floorY = -boxHeight / 2 + ballRadius;
+        const ceilingY = boxHeight / 2 - ballRadius;
+        const leftWall = -boxWidth / 2 + ballRadius;
+        const rightWall = boxWidth / 2 - ballRadius;
 
         if (ballData.group.position.y < floorY) {
             ballData.group.position.y = floorY;
@@ -484,3 +569,108 @@ function animate() {
 }
 
 animate();
+
+// Load model with custom radius
+function loadModelWithRadius(ballData, customRadius, index) {
+    loader.load(
+        ballData.modelPath,
+        function (gltf) {
+            ballData.model = gltf.scene;
+            
+            ballData.model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    if (child.material) {
+                        child.material.needsUpdate = true;
+                    }
+                }
+            });
+            
+            const originalBox = new THREE.Box3().setFromObject(ballData.model);
+            const originalSize = originalBox.getSize(new THREE.Vector3());
+            const maxDim = Math.max(originalSize.x, originalSize.y, originalSize.z);
+            
+            const scale = (customRadius * 2) / maxDim;
+            ballData.model.scale.set(scale, scale, scale);
+            
+            ballData.model.updateMatrixWorld(true);
+            const scaledBox = new THREE.Box3().setFromObject(ballData.model);
+            const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+            
+            ballData.model.position.sub(scaledCenter);
+            
+            const modelWrapper = new THREE.Group();
+            modelWrapper.add(ballData.model);
+            ballData.group.add(modelWrapper);
+            
+            ballData.modelWrapper = modelWrapper;
+            
+            const maxX = boxWidth / 2 - customRadius;
+            const maxY = boxHeight / 2 - customRadius;
+            
+            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            ballData.group.position.z = 0;
+            
+            console.log(`${ballData.id} ${index + 1} loaded with radius: ${customRadius}`);
+            
+            modelsLoaded++;
+            if (modelsLoaded >= balls.length) {
+                setTimeout(() => {
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500);
+            }
+        },
+        function (xhr) {
+            console.log(`${ballData.id} ${index + 1}: ${(xhr.loaded / xhr.total * 100)}% loaded`);
+        },
+        function (error) {
+            console.error(`Error loading ${ballData.id} ${index + 1} model:`, error);
+            
+            // Create fallback sphere
+            const geometry = new THREE.SphereGeometry(customRadius, 32, 32);
+            const material = new THREE.MeshPhongMaterial({
+                color: ballData.color,
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            
+            ballData.model = new THREE.Mesh(geometry, material);
+            ballData.model.castShadow = true;
+            ballData.model.receiveShadow = true;
+            
+            const modelWrapper = new THREE.Group();
+            modelWrapper.add(ballData.model);
+            ballData.group.add(modelWrapper);
+            ballData.modelWrapper = modelWrapper;
+            
+            const maxX = boxWidth / 2 - customRadius;
+            const maxY = boxHeight / 2 - customRadius;
+            
+            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            
+            modelsLoaded++;
+            if (modelsLoaded >= balls.length) {
+                setTimeout(() => {
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500);
+            }
+        }
+    );
+}
+
+// Expose commands globally for console access
+window.fruitCommands = fruitCommands;
