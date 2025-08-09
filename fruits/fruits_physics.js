@@ -48,6 +48,12 @@ function updateSize() {
             ballData.group.position.y = Math.max(floorY, Math.min(ceilingY, ballData.group.position.y));
         }
     });
+
+    // Keep scoreboard width in sync with box width
+    if (gameState.overlay) {
+        const rect = box.getBoundingClientRect();
+        gameState.overlay.style.width = Math.round(rect.width) + 'px';
+    }
 }
 
 // Listen for both window resize and container size changes
@@ -101,6 +107,217 @@ const gravity = -0.5;
 const bounce = 0.7;
 const friction = 0.98;
 const restThreshold = 0.5;
+
+// Whackaberry game state
+const gameState = {
+    isActive: false,
+    score: 0,
+    timeLeft: 30,
+    spawnIntervalId: null,
+    timerIntervalId: null,
+    overlay: null,
+    scoreEl: null,
+    timeEl: null,
+    highEl: null,
+    highScoreKey: 'whackaberryHighScore',
+    despawnTimeoutByBall: new WeakMap()
+};
+
+function getHighScore() {
+    try {
+        const val = localStorage.getItem(gameState.highScoreKey);
+        const parsed = parseInt(val, 10);
+        return Number.isFinite(parsed) ? parsed : 0;
+    } catch (_) {
+        return 0;
+    }
+}
+
+function setHighScore(value) {
+    try {
+        localStorage.setItem(gameState.highScoreKey, String(value));
+    } catch (_) {
+        // ignore
+    }
+}
+
+function createWhackOverlay() {
+    if (!box) return;
+    const overlay = document.createElement('div');
+    overlay.style.position = 'relative';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'space-between';
+    overlay.style.alignItems = 'center';
+    overlay.style.gap = '8px';
+    overlay.style.zIndex = '20';
+    const rect = box.getBoundingClientRect();
+    overlay.style.width = rect.width + 'px';
+    overlay.style.boxSizing = 'border-box';
+    overlay.style.margin = '8px auto 0 auto';
+    overlay.style.background = '#ffffff';
+    overlay.style.border = '2px solid #ff66b2';
+    overlay.style.borderRadius = '12px';
+    overlay.style.padding = '8px 12px';
+    overlay.style.boxShadow = '0 2px 8px rgba(255,102,178,0.10)';
+    overlay.style.opacity = '1';
+    overlay.style.transition = 'opacity 0.8s ease';
+
+    function makeBadge(label, id) {
+        const badge = document.createElement('div');
+        badge.id = id;
+        badge.style.background = 'transparent';
+        badge.style.border = 'none';
+        badge.style.borderRadius = '8px';
+        badge.style.padding = '4px 8px';
+        badge.style.fontFamily = `'Work Sans', sans-serif`;
+        badge.style.fontSize = '16px';
+        badge.style.color = '#333';
+        badge.textContent = label;
+        return badge;
+    }
+
+    const scoreEl = makeBadge('Score: 0', 'whack-score');
+    const high = getHighScore();
+    const highEl = makeBadge(`High: ${high}`, 'whack-high');
+    const timeEl = makeBadge('Time: 30s', 'whack-time');
+
+    const leftSection = document.createElement('div');
+    leftSection.style.display = 'flex';
+    leftSection.style.gap = '8px';
+    leftSection.appendChild(scoreEl);
+    leftSection.appendChild(highEl);
+
+    const rightSection = document.createElement('div');
+    rightSection.appendChild(timeEl);
+
+    overlay.appendChild(leftSection);
+    overlay.appendChild(rightSection);
+
+    // Insert below the fruit window, above the console
+    const parent = box.parentNode;
+    if (parent) {
+        parent.insertBefore(overlay, box.nextSibling);
+    } else {
+        box.appendChild(overlay);
+    }
+
+    gameState.overlay = overlay;
+    gameState.scoreEl = scoreEl;
+    gameState.timeEl = timeEl;
+    gameState.highEl = highEl;
+}
+
+function destroyWhackOverlay() {
+    if (gameState.overlay && gameState.overlay.parentNode) {
+        gameState.overlay.parentNode.removeChild(gameState.overlay);
+    }
+    gameState.overlay = null;
+    gameState.scoreEl = null;
+    gameState.timeEl = null;
+    gameState.highEl = null;
+}
+
+function updateWhackOverlay() {
+    if (gameState.scoreEl) gameState.scoreEl.textContent = `Score: ${gameState.score}`;
+    if (gameState.timeEl) gameState.timeEl.textContent = `Time: ${gameState.timeLeft}s`;
+    if (gameState.highEl) gameState.highEl.textContent = `High: ${getHighScore()}`;
+}
+
+function removeBallFromScene(ballData) {
+    if (!ballData) return;
+    // Clear any pending despawn timeout for this ball
+    const existing = gameState.despawnTimeoutByBall.get(ballData);
+    if (existing) {
+        clearTimeout(existing);
+        gameState.despawnTimeoutByBall.delete(ballData);
+    }
+    if (ballData.group) {
+        scene.remove(ballData.group);
+        ballData.group = null;
+        ballData.model = null;
+        ballData.modelWrapper = null;
+    }
+    const idx = balls.indexOf(ballData);
+    if (idx >= 0) balls.splice(idx, 1);
+}
+
+function endWhackaberryGame() {
+    if (!gameState.isActive) return;
+    gameState.isActive = false;
+    if (gameState.spawnIntervalId) clearInterval(gameState.spawnIntervalId);
+    if (gameState.timerIntervalId) clearInterval(gameState.timerIntervalId);
+    gameState.spawnIntervalId = null;
+    gameState.timerIntervalId = null;
+
+    // Update high score if needed
+    const currentHigh = getHighScore();
+    if (gameState.score > currentHigh) {
+        setHighScore(gameState.score);
+    }
+    updateWhackOverlay();
+
+    // Keep scoreboard visible for 10s, then fade out and remove
+    if (gameState.overlay) {
+        setTimeout(() => {
+            if (!gameState.overlay) return;
+            gameState.overlay.style.opacity = '0';
+            setTimeout(() => {
+                destroyWhackOverlay();
+            }, 900);
+        }, 10000);
+    }
+}
+
+function startWhackaberryGame() {
+    // Reset and prepare
+    fruitCommands.clearScene();
+    gameState.isActive = true;
+    gameState.score = 0;
+    gameState.timeLeft = 30;
+    createWhackOverlay();
+    updateWhackOverlay();
+
+    // Initial fruits: more apples and a few strawberries, smaller radius for faster play
+    fruitCommands.createFruits('apple', 10, 25);
+    fruitCommands.createFruits('strawberry', 2, 25);
+
+    // Continuous spawning: fast pace; mostly apples, sometimes strawberry
+    gameState.spawnIntervalId = setInterval(() => {
+        if (!gameState.isActive) return;
+        // Spawn a single fruit each tick
+        const r = Math.random();
+        if (r < 0.25) {
+            fruitCommands.createFruits('strawberry', 1, 25);
+        } else {
+            fruitCommands.createFruits('apple', 1, 25);
+        }
+
+        // Cull oldest fruits if too many on screen
+        const maxFruits = 25;
+        if (balls.length > maxFruits) {
+            // Remove oldest surplus
+            const surplus = balls.length - maxFruits;
+            for (let i = 0; i < surplus; i++) {
+                // Prefer removing from start; those are older
+                const candidate = balls[0];
+                removeBallFromScene(candidate);
+            }
+        }
+    }, 600);
+
+    // Countdown timer
+    gameState.timerIntervalId = setInterval(() => {
+        if (!gameState.isActive) return;
+        gameState.timeLeft -= 1;
+        if (gameState.timeLeft <= 0) {
+            gameState.timeLeft = 0;
+            updateWhackOverlay();
+            endWhackaberryGame();
+        } else {
+            updateWhackOverlay();
+        }
+    }, 1000);
+}
 
 // Command framework
 const fruitCommands = {
@@ -186,6 +403,14 @@ const fruitCommands = {
         });
         
         return `Exploded ${balls.length} fruits from below!`;
+    },
+
+    whackaberry: function() {
+        if (gameState.isActive) {
+            endWhackaberryGame();
+        }
+        startWhackaberryGame();
+        return `Whack-A-Berry: 30 seconds. Click strawberries (+1), apples (-1). Good luck!`;
     }
 };
 
@@ -421,6 +646,40 @@ function getBallAtPosition(sceneX, sceneY) {
 const canvas = renderer.domElement;
 
 function handleDragStart(e) {
+    // In game mode, treat press as a whack and do not initiate drag
+    if (gameState.isActive) {
+        const coords = getSceneCoords(e);
+        if (!coords) return;
+        const ball = getBallAtPosition(coords.x, coords.y);
+        if (ball) {
+            if (ball.id === 'strawberry') {
+                gameState.score += 1;
+                updateWhackOverlay();
+                removeBallFromScene(ball);
+            } else if (ball.id === 'apple') {
+                gameState.score -= 1;
+                if (gameState.score < 0) gameState.score = 0;
+                // Small explosion from the clicked apple's position
+                const centerX = ball.group.position.x;
+                const centerY = ball.group.position.y;
+                balls.forEach(other => {
+                    if (!other.group) return;
+                    const dx = other.group.position.x - centerX;
+                    const dy = other.group.position.y - centerY;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 0.0001;
+                    const nx = dx / distance;
+                    const ny = dy / distance;
+                    const baseForce = 6; // smaller than explode()
+                    const distanceMultiplier = Math.min(distance * 0.1, 4);
+                    const totalForce = baseForce + distanceMultiplier;
+                    other.vx += nx * totalForce;
+                    other.vy += ny * totalForce;
+                });
+                updateWhackOverlay();
+            }
+        }
+        return;
+    }
     const coords = getSceneCoords(e);
     if (!coords) return;
 
@@ -608,10 +867,25 @@ function loadModelWithRadius(ballData, customRadius, index) {
             ballData.modelWrapper = modelWrapper;
             
             const maxX = boxWidth / 2 - customRadius;
-            const maxY = boxHeight / 2 - customRadius;
-            
-            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
-            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            const topY = boxHeight / 2 - customRadius;
+
+            // During game, always spawn at top row; otherwise keep original random spread
+            if (gameState.isActive) {
+                ballData.group.position.x = (Math.random() * 2 - 1) * (maxX * 0.9);
+                ballData.group.position.y = topY;
+            } else {
+                const maxY = boxHeight / 2 - customRadius;
+                ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+                ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            }
+
+            // In game, schedule strawberry auto-despawn in 2 seconds
+            if (gameState.isActive && ballData.id === 'strawberry') {
+                const timeoutId = setTimeout(() => {
+                    removeBallFromScene(ballData);
+                }, 1000);
+                gameState.despawnTimeoutByBall.set(ballData, timeoutId);
+            }
             ballData.group.position.z = 0;
             
             console.log(`${ballData.id} ${index + 1} loaded with radius: ${customRadius}`);
@@ -652,10 +926,23 @@ function loadModelWithRadius(ballData, customRadius, index) {
             ballData.modelWrapper = modelWrapper;
             
             const maxX = boxWidth / 2 - customRadius;
-            const maxY = boxHeight / 2 - customRadius;
-            
-            ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
-            ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            const topY = boxHeight / 2 - customRadius;
+
+            if (gameState.isActive) {
+                ballData.group.position.x = (Math.random() * 2 - 1) * (maxX * 0.9);
+                ballData.group.position.y = topY;
+            } else {
+                const maxY = boxHeight / 2 - customRadius;
+                ballData.group.position.x = (Math.random() - 0.5) * maxX * 1.5;
+                ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
+            }
+
+            if (gameState.isActive && ballData.id === 'strawberry') {
+                const timeoutId = setTimeout(() => {
+                    removeBallFromScene(ballData);
+                }, 2000);
+                gameState.despawnTimeoutByBall.set(ballData, timeoutId);
+            }
             
             modelsLoaded++;
             if (modelsLoaded >= balls.length) {
