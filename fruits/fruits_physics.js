@@ -51,8 +51,8 @@ function updateSize() {
 
     // Keep scoreboard width in sync with box width
     if (gameState.overlay) {
-        const rect = box.getBoundingClientRect();
-        gameState.overlay.style.width = Math.round(rect.width) + 'px';
+        const cw = getComputedStyle(box).width;
+        gameState.overlay.style.width = cw;
     }
 }
 
@@ -111,8 +111,10 @@ const restThreshold = 0.5;
 // Whackaberry game state
 const gameState = {
     isActive: false,
+    isStarting: false,
+    countdownStarted: false,
     score: 0,
-    timeLeft: 30,
+    timeLeft: 45,
     spawnIntervalId: null,
     timerIntervalId: null,
     overlay: null,
@@ -179,7 +181,7 @@ function createWhackOverlay() {
     const scoreEl = makeBadge('Score: 0', 'whack-score');
     const high = getHighScore();
     const highEl = makeBadge(`High: ${high}`, 'whack-high');
-    const timeEl = makeBadge('Time: 30s', 'whack-time');
+    const timeEl = makeBadge('Time: 45s', 'whack-time');
 
     const leftSection = document.createElement('div');
     leftSection.style.display = 'flex';
@@ -244,6 +246,7 @@ function removeBallFromScene(ballData) {
 function endWhackaberryGame() {
     if (!gameState.isActive) return;
     gameState.isActive = false;
+    gameState.isStarting = false;
     if (gameState.spawnIntervalId) clearInterval(gameState.spawnIntervalId);
     if (gameState.timerIntervalId) clearInterval(gameState.timerIntervalId);
     gameState.spawnIntervalId = null;
@@ -272,16 +275,27 @@ function startWhackaberryGame() {
     // Reset and prepare
     fruitCommands.clearScene();
     gameState.isActive = true;
+    gameState.isStarting = true;
     gameState.score = 0;
-    gameState.timeLeft = 30;
+    gameState.timeLeft = 45;
     createWhackOverlay();
     updateWhackOverlay();
+
+    // Show loading screen while initial models load
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
+        loadingScreen.style.opacity = '1';
+    }
+
+    modelsLoaded = 0;
 
     // Initial fruits: more apples and a few strawberries, smaller radius for faster play
     fruitCommands.createFruits('apple', 10, 25);
     fruitCommands.createFruits('strawberry', 2, 25);
+}
 
-    // Continuous spawning: fast pace; mostly apples, sometimes strawberry
+function beginActiveGameplay() {
+    // Start spawning loop
     gameState.spawnIntervalId = setInterval(() => {
         if (!gameState.isActive) return;
         // Spawn a single fruit each tick
@@ -295,17 +309,15 @@ function startWhackaberryGame() {
         // Cull oldest fruits if too many on screen
         const maxFruits = 25;
         if (balls.length > maxFruits) {
-            // Remove oldest surplus
             const surplus = balls.length - maxFruits;
             for (let i = 0; i < surplus; i++) {
-                // Prefer removing from start; those are older
                 const candidate = balls[0];
                 removeBallFromScene(candidate);
             }
         }
     }, 600);
 
-    // Countdown timer
+    // Start game timer
     gameState.timerIntervalId = setInterval(() => {
         if (!gameState.isActive) return;
         gameState.timeLeft -= 1;
@@ -317,6 +329,61 @@ function startWhackaberryGame() {
             updateWhackOverlay();
         }
     }, 1000);
+
+    // Schedule despawn for any existing strawberries (initial ones)
+    balls.forEach(ball => {
+        if (ball.id === 'strawberry' && ball.group && !gameState.despawnTimeoutByBall.get(ball)) {
+            const timeoutId = setTimeout(() => {
+                removeBallFromScene(ball);
+            }, 1000);
+            gameState.despawnTimeoutByBall.set(ball, timeoutId);
+        }
+    });
+}
+
+function runStartCountdown() {
+    if (!loadingScreen) {
+        // Fallback: begin immediately
+        gameState.isStarting = false;
+        beginActiveGameplay();
+        return;
+    }
+
+    // Prepare countdown display
+    loadingScreen.style.display = 'flex';
+    loadingScreen.style.opacity = '1';
+
+    // Replace inner content with big countdown
+    loadingScreen.innerHTML = '';
+    const big = document.createElement('div');
+    big.style.fontFamily = `'Work Sans', sans-serif`;
+    big.style.fontWeight = '700';
+    big.style.fontSize = '64px';
+    big.style.color = '#ff66b2';
+    big.style.background = 'rgba(255,255,255,0.85)';
+    big.style.padding = '16px 24px';
+    big.style.borderRadius = '16px';
+    big.textContent = '3';
+    loadingScreen.appendChild(big);
+
+    let count = 3;
+    const step = () => {
+        count -= 1;
+        if (count === 0) {
+            // Start game
+            gameState.isStarting = false;
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                loadingScreen.innerHTML = '';
+            }, 400);
+            beginActiveGameplay();
+        } else {
+            big.textContent = String(count);
+            setTimeout(step, 1000);
+        }
+    };
+    setTimeout(step, 1000);
 }
 
 // Command framework
@@ -410,7 +477,7 @@ const fruitCommands = {
             endWhackaberryGame();
         }
         startWhackaberryGame();
-        return `Whack-A-Berry: 30 seconds. Click strawberries (+1), apples (-1). Good luck!`;
+        return `Whack-A-Berry: 45 seconds. Click strawberries (+1), apples (-1). Good luck!`;
     }
 };
 
@@ -891,15 +958,23 @@ function loadModelWithRadius(ballData, customRadius, index) {
             console.log(`${ballData.id} ${index + 1} loaded with radius: ${customRadius}`);
             
             modelsLoaded++;
-            if (modelsLoaded >= balls.length) {
-                setTimeout(() => {
-                    if (loadingScreen) {
-                        loadingScreen.style.opacity = '0';
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 500);
-                    }
-                }, 500);
+            if (gameState.isActive && gameState.isStarting && !gameState.countdownStarted) {
+                // Use countdown once initial batch is ready
+                if (modelsLoaded >= balls.length) {
+                    gameState.countdownStarted = true;
+                    setTimeout(runStartCountdown, 200);
+                }
+            } else {
+                if (modelsLoaded >= balls.length) {
+                    setTimeout(() => {
+                        if (loadingScreen) {
+                            loadingScreen.style.opacity = '0';
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                            }, 500);
+                        }
+                    }, 500);
+                }
             }
         },
         function (xhr) {
@@ -945,15 +1020,22 @@ function loadModelWithRadius(ballData, customRadius, index) {
             }
             
             modelsLoaded++;
-            if (modelsLoaded >= balls.length) {
-                setTimeout(() => {
-                    if (loadingScreen) {
-                        loadingScreen.style.opacity = '0';
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 500);
-                    }
-                }, 500);
+            if (gameState.isActive && gameState.isStarting && !gameState.countdownStarted) {
+                if (modelsLoaded >= balls.length) {
+                    gameState.countdownStarted = true;
+                    setTimeout(runStartCountdown, 200);
+                }
+            } else {
+                if (modelsLoaded >= balls.length) {
+                    setTimeout(() => {
+                        if (loadingScreen) {
+                            loadingScreen.style.opacity = '0';
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                            }, 500);
+                        }
+                    }, 500);
+                }
             }
         }
     );
