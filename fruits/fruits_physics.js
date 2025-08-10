@@ -259,6 +259,32 @@ function endWhackaberryGame() {
     }
     updateWhackOverlay();
 
+    // Centered Game Over message
+    if (box) {
+        const over = document.createElement('div');
+        over.textContent = 'Game Over';
+        over.style.position = 'absolute';
+        over.style.top = '50%';
+        over.style.left = '50%';
+        over.style.transform = 'translate(-50%, -50%)';
+        over.style.background = 'rgba(255,255,255,0.95)';
+        over.style.border = '2px solid #ff66b2';
+        over.style.borderRadius = '16px';
+        over.style.padding = '16px 24px';
+        over.style.fontFamily = `'Work Sans', sans-serif`;
+        over.style.fontWeight = '700';
+        over.style.fontSize = '48px';
+        over.style.color = '#ff66b2';
+        over.style.zIndex = '25';
+        over.style.opacity = '1';
+        over.style.transition = 'opacity 0.8s ease';
+        box.appendChild(over);
+        setTimeout(() => {
+            over.style.opacity = '0';
+            setTimeout(() => over.remove(), 800);
+        }, 2500);
+    }
+
     // Keep scoreboard visible for 10s, then fade out and remove
     if (gameState.overlay) {
         setTimeout(() => {
@@ -300,7 +326,7 @@ function beginActiveGameplay() {
         if (!gameState.isActive) return;
         // Spawn a single fruit each tick
         const r = Math.random();
-        if (r < 0.25) {
+        if (r < 0.30) {
             fruitCommands.createFruits('strawberry', 1, 25);
         } else {
             fruitCommands.createFruits('apple', 1, 25);
@@ -335,7 +361,7 @@ function beginActiveGameplay() {
         if (ball.id === 'strawberry' && ball.group && !gameState.despawnTimeoutByBall.get(ball)) {
             const timeoutId = setTimeout(() => {
                 removeBallFromScene(ball);
-            }, 1000);
+            }, 1600);
             gameState.despawnTimeoutByBall.set(ball, timeoutId);
         }
     });
@@ -946,11 +972,11 @@ function loadModelWithRadius(ballData, customRadius, index) {
                 ballData.group.position.y = (Math.random() - 0.5) * maxY * 1.5;
             }
 
-            // In game, schedule strawberry auto-despawn in 2 seconds
+            // In game, schedule strawberry auto-despawn
             if (gameState.isActive && ballData.id === 'strawberry') {
                 const timeoutId = setTimeout(() => {
                     removeBallFromScene(ballData);
-                }, 1000);
+                }, 1800);
                 gameState.despawnTimeoutByBall.set(ballData, timeoutId);
             }
             ballData.group.position.z = 0;
@@ -1015,7 +1041,7 @@ function loadModelWithRadius(ballData, customRadius, index) {
             if (gameState.isActive && ballData.id === 'strawberry') {
                 const timeoutId = setTimeout(() => {
                     removeBallFromScene(ballData);
-                }, 2000);
+                }, 1800);
                 gameState.despawnTimeoutByBall.set(ballData, timeoutId);
             }
             
