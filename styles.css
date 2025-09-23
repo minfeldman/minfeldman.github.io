@@ -218,28 +218,11 @@ body {
     opacity: 0;
     transform: scale(0) rotate(0deg);
     animation: sparkle-animation 0.6s ease-in-out forwards;
-}
-
-.sparkle:before, .sparkle:after {
-    content: "";
-    position: absolute;
-    background-color: #ffcce6; /* baby pink color */
-}
-
-/* Vertical line of sparkle */
-.sparkle:before {
-    width: 2px;
-    height: 12px;
-    left: 5px;
-    top: 0px;
-}
-
-/* Horizontal line of sparkle */
-.sparkle:after {
+    /* Ensure proper positioning context */
+    transform-origin: center center;
+    /* Size the container for the diagonal elements */
     width: 12px;
-    height: 2px;
-    left: 0px;
-    top: 5px;
+    height: 12px;
 }
 
 @keyframes sparkle-animation {
@@ -289,4 +272,92 @@ body {
     border-bottom: 2px solid #ff66b2;
     cursor: default;
     pointer-events: none;
+}
+
+/* Quote Block Styling */
+.quote-block {
+    margin: 25px 0 20px 0;
+    text-align: center;
+    padding: 18px 20px;
+    background: #fefefe;
+    border: 1px solid #ffb8d1;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(255, 102, 178, 0.06);
+    position: relative;
+}
+
+.quote-block::before {
+    content: '"';
+    font-size: 32px;
+    color: #ff66b2;
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    font-family: 'Century Schoolbook', serif;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.quote-block::after {
+    content: '"';
+    font-size: 32px;
+    color: #ff66b2;
+    position: absolute;
+    bottom: 10px;
+    right: 16px;
+    font-family: 'Century Schoolbook', serif;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.quote-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444;
+    margin: 0 0 12px 0;
+    font-style: italic;
+    font-family: 'Century Schoolbook', serif;
+    padding: 0 20px;
+}
+
+.quote-attribution {
+    font-size: 13px;
+    color: #777;
+    font-weight: 500;
+    margin: 0;
+    font-family: 'Century Schoolbook', serif;
+}
+
+.quote-attribution::before {
+    content: "— ";
+    color: #ff66b2;
+}
+
+/* Responsive adjustments for quote block */
+@media (max-width: 600px) {
+    .quote-block {
+        margin: 18px 0;
+        padding: 15px 16px;
+    }
+
+    .quote-block::before {
+        font-size: 24px;
+        top: 8px;
+        left: 12px;
+    }
+
+    .quote-block::after {
+        font-size: 24px;
+        bottom: 8px;
+        right: 12px;
+    }
+
+    .quote-text {
+        font-size: 14px;
+        padding: 0 16px;
+    }
+
+    .quote-attribution {
+        font-size: 12px;
+    }
 }
