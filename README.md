@@ -1,6 +1,6 @@
 # min feldman, portfolio
 
-portfolio website for min yeshara feldman, a psychology student at the ohio state university! 
+portfolio website for min yeshara feldman, a recent osu psych grad! 
 
 ## contact
 
