@@ -109,22 +109,5 @@ function createSparkle(x, y) {
         }
     };
 
-    // Set timeout for cleanup
     setTimeout(cleanup, 600);
-
-    // Also clean up if sparkle is no longer in DOM (safety net)
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.removedNodes.forEach((node) => {
-                if (node === sparkle) {
-                    cleanup();
-                    observer.disconnect();
-                }
-            });
-        });
-    });
-
-    if (document.body) {
-        observer.observe(document.body, { childList: true });
-    }
 }
