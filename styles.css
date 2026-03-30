@@ -230,6 +230,47 @@ body {
     text-decoration: underline;
 }
 
+/* Research Page — Project Cards */
+
+.projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.project-card {
+    padding: 16px 18px;
+    border: 1px solid #ddd;
+    border-left: 3px solid #ff66b2;
+    border-radius: 4px;
+    background-color: #fcfcfc;
+}
+
+.project-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.project-desc {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 10px 0;
+}
+
+.project-collab {
+    font-size: 13px;
+    color: #999;
+    font-style: italic;
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px solid #f0e0ec;
+}
+
 /* Sparkle Styling */
 
 .sparkle {
