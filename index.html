@@ -14,10 +14,10 @@
     <div class="container">
         <div class="profile-section">
             <div class="profile-pic">
-                <img src="pfp.jpeg" alt="min yeshara feldman" ondragstart="return false;">
+                <img src="public/pfp.jpeg" alt="min yeshara feldman" ondragstart="return false;">
             </div>
             <div class="profile-info">
-                <h2 class="name">min yeshara feldman <a href="mf_cv.pdf" class="cv-link" style="font-size: medium;" target="_blank">[cv]</a></h2>
+                <h2 class="name">min yeshara feldman <a href="public/mf_cv.pdf" class="cv-link" style="font-size: medium;" target="_blank">[cv]</a></h2>
                 <p>incoming phd student @ harvard</p>
             </div>
         </div>
@@ -40,6 +40,8 @@
                 <br>
                 <p>in my free time, you can find me reading fiction, swimming, at a ceramics or yoga class, trying new coffeeshops, or on a long walk listening to yacht rock!</p>
                 <br>
+                <p id="miffy-reading">currently reading...</p>
+                <br id="miffy-reading-br">
                 <p>inquiries, <a class="email-link" href="mailto:feldman.307@osu.edu">feldman.307@osu.edu</a></p>
             </div>
         </div>
@@ -88,6 +90,39 @@
         </div>
         
     </div>
+    <div class="miffy-sticker-wrap">
+        <img id="miffy-img" class="miffy-sticker-img" alt="" aria-hidden="true" ondragstart="return false;">
+    </div>
+    <img class="miffy-sticker-left" src="public/miffy_2.png" alt="" aria-hidden="true" ondragstart="return false;">
 </body>
 <script src="sparkle.js"></script>
+<script>
+    const MIFFY_BOOK_TITLE = "Daphnis and Chloe";
+    const API_BASE = "https://api.albertastrom.com";
+
+    (async () => {
+        try {
+            const res = await fetch(`${API_BASE}/generate?title=${encodeURIComponent(MIFFY_BOOK_TITLE)}`);
+            if (!res.ok) throw new Error(res.statusText);
+            const data = await res.json();
+            document.getElementById("miffy-img").src = `data:image/png;base64,${data.image}`;
+            const readingEl = document.getElementById("miffy-reading");
+            readingEl.textContent = "";
+            readingEl.appendChild(document.createTextNode("currently reading "));
+            const titleEl = document.createElement("cite");
+            titleEl.textContent = data.title;
+            readingEl.appendChild(titleEl);
+            readingEl.appendChild(document.createTextNode(" by "));
+            readingEl.appendChild(document.createTextNode(data.author));
+        } catch (e) {
+            console.error("Miffy API error:", e);
+            const miffyImg = document.getElementById("miffy-img");
+            miffyImg.src = "public/miffy.png";
+            miffyImg.style.width = "150px";
+            document.querySelector(".miffy-sticker-wrap").style.left = "calc(50vw + 410px)";
+            document.getElementById("miffy-reading").remove();
+            document.getElementById("miffy-reading-br").remove();
+        }
+    })();
+</script>
 </html>
