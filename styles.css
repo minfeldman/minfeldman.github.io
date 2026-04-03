@@ -115,6 +115,10 @@ body {
     line-height: 1.2;
 }
 
+#miffy-reading cite {
+    font-style: italic;
+}
+
 .cv-link {
     color: #ff66b2;
     text-decoration: none;
@@ -421,5 +425,41 @@ body {
 
     .quote-attribution {
         font-size: 12px;
+    }
+}
+
+/* Miffy stickers — home page only */
+.miffy-sticker-wrap, .miffy-sticker-left {
+    display: none;
+    position: absolute;
+    pointer-events: none;
+    z-index: 50;
+    user-select: none;
+}
+
+.miffy-sticker-wrap {
+    left: calc(50vw + 445px);
+    top: 220px;
+    transform: rotate(9deg);
+    width: 110px;
+}
+
+.miffy-sticker-img {
+    width: 110px;
+    display: block;
+    filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.18));
+}
+
+.miffy-sticker-left {
+    width: 140px;
+    filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.18));
+    right: calc(50vw + 415px);
+    top: 1100px;
+    transform: rotate(-6deg);
+}
+
+@media (min-width: 1040px) {
+    .miffy-sticker-wrap, .miffy-sticker-left {
+        display: block;
     }
 }
