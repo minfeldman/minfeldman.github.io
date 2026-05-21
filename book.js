@@ -1,4 +1,4 @@
-const MIFFY_BOOK_TITLE = "Say Nothing: A True Story of Murder and Memory in Northern Ireland";
+const MIFFY_BOOK_TITLE = "Say Nothing";
 const API_BASE = "https://api.albertastrom.com";
 
 (async () => {
