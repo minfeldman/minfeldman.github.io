@@ -851,28 +851,47 @@ canvas.addEventListener('touchend', handleDragEnd);
 canvas.addEventListener('touchcancel', handleDragEnd);
 
 // Animation loop
-function animate() {
+const TARGET_FPS = 90;
+const TARGET_DT = 1000 / TARGET_FPS; 
+
+let lastTime = null;
+
+function animate(timestamp) {
     requestAnimationFrame(animate);
-    
+
+    // Skip physics until we have a valid timestamp from rAF
+    if (lastTime === null) {
+        if (timestamp !== undefined) lastTime = timestamp;
+        renderer.render(scene, camera);
+        return;
+    }
+
+    const rawDt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    // Clamp to avoid huge jumps when the tab was backgrounded
+    const dt = Math.min(rawDt, TARGET_DT * 4);
+    const scale = dt / TARGET_DT;
+
     balls.forEach(ballData => {
         if (!ballData.group) return;
-        
+
         if (!isDragging || draggedBall !== ballData) {
-            ballData.vy += gravity;
-            ballData.vx *= 0.995;
-            ballData.vy *= 0.995;
-            
-            ballData.group.position.y += ballData.vy;
-            ballData.group.position.x += ballData.vx;
-            
+            ballData.vy += gravity * scale;
+            ballData.vx *= Math.pow(0.995, scale);
+            ballData.vy *= Math.pow(0.995, scale);
+
+            ballData.group.position.y += ballData.vy * scale;
+            ballData.group.position.x += ballData.vx * scale;
+
             if (ballData.modelWrapper && Math.abs(ballData.vx) > 0.1) {
-                ballData.modelWrapper.rotation.z -= ballData.vx * 0.01;
-                ballData.modelWrapper.rotation.x -= ballData.vx * 0.005;
+                ballData.modelWrapper.rotation.z -= ballData.vx * 0.01 * scale;
+                ballData.modelWrapper.rotation.x -= ballData.vx * 0.005 * scale;
             }
         }
     });
 
-    // Check ball-to-ball collisions
+    // Check ball-to-ball collisions (impulse-based, no dt scaling needed)
     for (let i = 0; i < balls.length; i++) {
         for (let j = i + 1; j < balls.length; j++) {
             if (balls[i].group && balls[j].group) {
@@ -884,7 +903,7 @@ function animate() {
     // Check wall collisions for each ball
     balls.forEach(ballData => {
         if (!ballData.group) return;
-        
+
         const ballRadius = ballData.radius || radius;
         const floorY = -boxHeight / 2 + ballRadius;
         const ceilingY = boxHeight / 2 - ballRadius;
@@ -894,20 +913,20 @@ function animate() {
         if (ballData.group.position.y < floorY) {
             ballData.group.position.y = floorY;
             ballData.vy *= -bounce;
-            ballData.vx *= friction;
-            
+            ballData.vx *= Math.pow(friction, scale);
+
             if (Math.abs(ballData.vy) < restThreshold && ballData.group.position.y <= floorY + 0.1) {
                 ballData.vy = 0;
-                ballData.vx *= 0.9;
+                ballData.vx *= Math.pow(0.9, scale);
                 if (Math.abs(ballData.vx) < 0.1) ballData.vx = 0;
             }
         }
-        
+
         if (ballData.group.position.y > ceilingY) {
             ballData.group.position.y = ceilingY;
             ballData.vy *= -bounce;
         }
-        
+
         if (ballData.group.position.x < leftWall) {
             ballData.group.position.x = leftWall;
             ballData.vx *= -bounce;
@@ -916,7 +935,7 @@ function animate() {
             ballData.vx *= -bounce;
         }
     });
-    
+
     renderer.render(scene, camera);
 }
 
