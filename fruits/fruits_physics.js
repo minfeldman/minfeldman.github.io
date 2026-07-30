@@ -157,10 +157,10 @@ function createWhackOverlay() {
     overlay.style.boxSizing = 'border-box';
     overlay.style.margin = '8px auto 0 auto';
     overlay.style.background = '#ffffff';
-    overlay.style.border = '2px solid #ff66b2';
+    overlay.style.border = '2px solid #4a90e2';
     overlay.style.borderRadius = '12px';
     overlay.style.padding = '8px 12px';
-    overlay.style.boxShadow = '0 2px 8px rgba(255,102,178,0.10)';
+    overlay.style.boxShadow = '0 2px 8px rgba(74,144,226,0.10)';
     overlay.style.opacity = '1';
     overlay.style.transition = 'opacity 0.8s ease';
 
@@ -268,13 +268,13 @@ function endWhackaberryGame() {
         over.style.left = '50%';
         over.style.transform = 'translate(-50%, -50%)';
         over.style.background = 'rgba(255,255,255,0.95)';
-        over.style.border = '2px solid #ff66b2';
+        over.style.border = '2px solid #4a90e2';
         over.style.borderRadius = '16px';
         over.style.padding = '16px 24px';
         over.style.fontFamily = `'Work Sans', sans-serif`;
         over.style.fontWeight = '700';
         over.style.fontSize = '48px';
-        over.style.color = '#ff66b2';
+        over.style.color = '#4a90e2';
         over.style.zIndex = '25';
         over.style.opacity = '1';
         over.style.transition = 'opacity 0.8s ease';
@@ -385,7 +385,7 @@ function runStartCountdown() {
     big.style.fontFamily = `'Work Sans', sans-serif`;
     big.style.fontWeight = '700';
     big.style.fontSize = '64px';
-    big.style.color = '#ff66b2';
+    big.style.color = '#4a90e2';
     big.style.background = 'rgba(255,255,255,0.85)';
     big.style.padding = '16px 24px';
     big.style.borderRadius = '16px';
