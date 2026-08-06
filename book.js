@@ -31,7 +31,7 @@ function applyMiffy(data) {
 function applyFallback() {
     const miffyImg = document.getElementById("miffy-img");
     if (!miffyImg) return;
-    miffyImg.src = "public/miffy.png";
+    miffyImg.src = "/public/miffy.png";
     miffyImg.style.width = "150px";
     const wrap = document.querySelector(".miffy-sticker-wrap");
     if (wrap) wrap.style.left = "calc(50vw + 410px)";
