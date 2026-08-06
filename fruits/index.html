@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="view-transition" content="same-origin">
     <title>fruits | min yeshara feldman</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
@@ -246,13 +247,14 @@
                 <p>incoming phd student @ harvard</p>
             </div>
         </div>
-        <hr style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
+        <hr class="site-rule" style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
         <div class="nav-bar">
-            <a href="../index.html" class="nav-link">about</a>
-            <a href="../research/" class="nav-link">research</a>
-            <a href="../fun/" class="nav-link">fun</a>
+            <a href="/" class="nav-link">about</a>
+            <a href="/research/" class="nav-link">research</a>
+            <a href="/fun/" class="nav-link">fun</a>
             <span class="nav-link nav-active">fruits</span>
         </div>
+        <main id="page-main" data-page="fruits">
         <div class="center-content">
             <div class="ball-box" id="ball-box">
                 <div class="loading-screen" id="loading-screen">
@@ -277,6 +279,7 @@
             </div>
             <div class="console-output" id="console-output"></div>
         </div>
+        </main>
     </div>
     
     <!-- Single Three.js version import -->
@@ -383,4 +386,5 @@
         }
     </script>
 </body>
+<script src="../soft-nav.js"></script>
 </html>

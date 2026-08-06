@@ -464,3 +464,53 @@ body {
         display: block;
     }
 }
+
+
+/* === page view transitions (MPA) === */
+/* Used for full loads and for document.startViewTransition in soft-nav */
+@view-transition {
+    navigation: auto;
+}
+
+.profile-section {
+    view-transition-name: site-profile;
+}
+
+.site-rule {
+    view-transition-name: site-rule;
+}
+
+.nav-bar {
+    view-transition-name: site-nav;
+}
+
+#page-main {
+    view-transition-name: page-main;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.18s;
+    animation-timing-function: ease;
+}
+
+::view-transition-group(site-profile),
+::view-transition-group(site-rule),
+::view-transition-group(site-nav) {
+    animation-duration: 0.01s;
+    animation-timing-function: linear;
+}
+
+::view-transition-old(page-main),
+::view-transition-new(page-main) {
+    animation-duration: 0.2s;
+    animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

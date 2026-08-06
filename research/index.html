@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="view-transition" content="same-origin">
     <title>research | min yeshara feldman</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
@@ -21,7 +22,7 @@
                 <p>incoming phd student @ harvard</p>
             </div>
         </div>
-        <hr style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
+        <hr class="site-rule" style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
         <div class="nav-bar">
             <a href="/" class="nav-link">about</a>
             <span class="nav-link nav-active">research</span>
@@ -29,6 +30,7 @@
             <a href="/fruits/" class="nav-link">fruits</a>
         </div>
 
+        <main id="page-main" data-page="research">
         <div class="projects-section">
             <h3 class="section-title">research projects</h3>
             <div class="projects-list">
@@ -69,7 +71,9 @@
             </div>
         </div>
 
+        </main>
     </div>
 </body>
 <script src="../sparkle.js"></script>
+<script src="../soft-nav.js"></script>
 </html>

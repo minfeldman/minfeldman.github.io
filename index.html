@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="view-transition" content="same-origin">
     <title>min yeshara feldman</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -22,7 +23,7 @@
             </div>
         </div>
 
-        <hr style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
+        <hr class="site-rule" style="border: 0; height: 2px; background: #ff66b2; margin: 10px 0;">
 
         <div class="nav-bar">
             <span class="nav-link nav-active">about</span>
@@ -31,6 +32,7 @@
             <a href="/fruits/" class="nav-link">fruits</a>
         </div>
 
+        <main id="page-main" data-page="about">
         <div class="about-section">
             <h3 class="section-title">about me</h3>
             <div class="description-box">
@@ -88,13 +90,15 @@
                 </div>
             </div>
         </div>
-        
+
+        <div class="miffy-sticker-wrap">
+            <img id="miffy-img" class="miffy-sticker-img" src="public/miffy.png" alt="" aria-hidden="true" ondragstart="return false;">
+        </div>
+        <img class="miffy-sticker-left" src="public/miffy_2.png" alt="" aria-hidden="true" ondragstart="return false;">
+        </main>
     </div>
-    <div class="miffy-sticker-wrap">
-        <img id="miffy-img" class="miffy-sticker-img" src="public/miffy.png" alt="" aria-hidden="true" ondragstart="return false;">
-    </div>
-    <img class="miffy-sticker-left" src="public/miffy_2.png" alt="" aria-hidden="true" ondragstart="return false;">
 </body>
 <script src="sparkle.js"></script>
 <script src="book.js"></script>
+<script src="soft-nav.js"></script>
 </html>
