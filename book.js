@@ -1,4 +1,4 @@
-const MIFFY_BOOK_TITLE = "Say Nothing";
+const MIFFY_BOOK_TITLE = "My Brilliant Friend";
 const API_BASE = "https://api.albertastrom.com";
 const CACHE_KEY = "miffy-book-v1";
 
