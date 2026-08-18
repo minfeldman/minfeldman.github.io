@@ -14,6 +14,16 @@ function writeCache(data) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
 }
 
+// Open Library stores many titles in sentence case. Title-case for display only.
+function toTitleCase(title) {
+    const small = new Set(["a", "an", "and", "as", "at", "but", "by", "for", "in", "nor", "of", "on", "or", "the", "to", "vs", "via"]);
+    return String(title).split(/\s+/).map((word, i) => {
+        const lower = word.toLowerCase();
+        if (i !== 0 && small.has(lower)) return lower;
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join(" ");
+}
+
 function applyMiffy(data) {
     const miffyImg = document.getElementById("miffy-img");
     const readingEl = document.getElementById("miffy-reading");
@@ -22,7 +32,7 @@ function applyMiffy(data) {
     readingEl.textContent = "";
     readingEl.appendChild(document.createTextNode("currently reading "));
     const titleEl = document.createElement("cite");
-    titleEl.textContent = data.title;
+    titleEl.textContent = toTitleCase(data.title);
     readingEl.appendChild(titleEl);
     readingEl.appendChild(document.createTextNode(" by "));
     readingEl.appendChild(document.createTextNode(data.author));
