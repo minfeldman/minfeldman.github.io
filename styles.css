@@ -1,10 +1,23 @@
+:root {
+    --pink: #f3c5d4;
+    --pink-soft: #f8d6e0;
+    --white: #ffffff;
+    --ink: #3f2a31;
+    --ink-muted: #6b4e57;
+    --ink-faint: #8a6a73;
+    --link: #8a3554;
+    --link-hover: #64263d;
+    --hairline: rgba(255, 255, 255, 0.85);
+}
+
 html {
     overflow-y: scroll;
 }
 
 body {
     font-family: 'Average Sans', sans serif;
-    background-color: #ffffff;
+    background-color: var(--pink);
+    color: var(--ink);
     margin: 0;
     padding: 10px;
 }
@@ -21,15 +34,15 @@ body {
         max-width: 100%;
         padding: 0 15px;
     }
-    
+
     .nav-bar {
         flex-wrap: wrap;
         gap: 16px;
         font-size: 16px;
     }
-    
+
     .name {
-        font-size: 20px;
+        font-size: 22px;
     }
 }
 
@@ -37,82 +50,79 @@ body {
     body {
         padding: 5px;
     }
-    
+
     .container {
         padding: 0 10px;
     }
-    
+
     .nav-bar {
         gap: 12px;
         font-size: 14px;
     }
-    
+
     .name {
         font-size: 18px;
     }
-    
-    .profile-pic img {
-        width: 80px;
-        height: 80px;
+
+    .profile-photos img {
+        width: 72px;
+        height: 72px;
     }
 }
 
-/* Only change profile layout to column on very small screens */
 @media (max-width: 350px) {
-    .profile-section {
-        flex-direction: column;
-        text-align: left;
-        gap: 10px;
-        align-items: flex-start;
+    .name {
+        font-size: 16px;
     }
-    
-    .profile-pic {
-        margin-right: 0;
-        align-self: flex-start;
-    }
-    
-    .profile-pic img {
-        width: 80px !important;
-        height: 80px !important;
-        display: block;
-    }
-    
-    .profile-info {
-        align-self: flex-start;
+
+    .profile-photos img {
+        width: 60px;
+        height: 60px;
     }
 }
 
 .profile-section {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 15px;
-}
-
-.profile-pic {
-    margin-right: 10px;
-}
-
-.profile-pic img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    user-select: none;
-    display: block;
 }
 
 .profile-info {
     text-align: left;
+    min-width: 0;
+    flex: 1;
 }
 
-.name {
-    font-size: 24px;
-    margin: 0;
-    line-height: 1.2;
+.profile-photos {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+}
+
+.profile-photos img {
+    width: 112px;
+    height: 112px;
+    object-fit: cover;
+    object-position: center 42%;
+    border-radius: 0;
+    user-select: none;
+    display: block;
+    box-sizing: border-box;
 }
 
 .profile-info p {
     margin: 0;
     line-height: 1.2;
+    color: var(--ink-muted);
+}
+
+.name {
+    font-size: 26px;
+    margin: 0 0 4px;
+    line-height: 1.15;
+    color: var(--ink);
 }
 
 #miffy-reading cite {
@@ -120,14 +130,20 @@ body {
 }
 
 .cv-link {
-    color: #ff66b2;
+    color: var(--link);
+    background: var(--white);
     text-decoration: none;
     font-weight: bold;
-    transition: color 0.2s;
+    font-size: 14px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    vertical-align: middle;
+    transition: opacity 0.2s;
 }
 
 .cv-link:hover {
-    color: #cc0052;
+    opacity: 0.82;
+    text-decoration: none;
 }
 
 .about-section, .research-section, .experience-section {
@@ -138,14 +154,15 @@ body {
     font-size: 20px;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #333;
+    color: var(--ink);
 }
 
 .description-box {
     padding: 14px 16px;
-    border: 1.5px solid #ff66b2;
+    border: 1.5px solid var(--white);
     border-radius: 6px;
-    background-color: #ffffff;
+    background-color: var(--white);
+    color: var(--ink);
 }
 
 .description-box p:last-child {
@@ -158,12 +175,12 @@ body {
 }
 
 .callout-box {
-    background-color: #ffe6f2;
+    background-color: var(--pink-soft);
     padding: 8px 10px;
     margin-top: 8px;
     font-size: 14px;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(63, 42, 49, 0.08);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -173,7 +190,7 @@ body {
 
 .callout-box:hover {
     transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(255, 102, 178, 0.18);
+    box-shadow: 0 3px 8px rgba(63, 42, 49, 0.12);
 }
 
 .experience-section {
@@ -183,7 +200,7 @@ body {
 .job-entry {
     margin-bottom: 0;
     padding-top: 10px;
-    border-top: 1px solid #f0e0ec;
+    border-top: 1px solid var(--pink-soft);
 }
 
 .job-entry:first-child {
@@ -199,40 +216,41 @@ body {
     font-size: 18px;
     font-weight: bold;
     margin: 0 0 3px;
-    color: #333;
+    color: var(--ink);
 }
 
 .company-name {
     font-size: 16px;
     margin: 0 0 3px;
-    color: #555;
+    color: var(--ink-muted);
 }
 
 .time-frame {
     font-size: 14px;
-    color: #777;
+    color: var(--ink-faint);
     margin: 0 0 3px;
 }
 
 .job-link {
     font-size: 14px;
-    color: #ff66b2;
+    color: var(--link);
     transition: color 0.3s ease;
     text-decoration: none;
 }
 
 .job-link:hover {
-    color: #cc0052;
+    color: var(--link-hover);
     text-decoration: underline;
 }
 
 .email-link {
-    color: #ff66b2;
+    color: var(--link);
     transition: color 0.3s ease;
     text-decoration: none;
 }
+
 .email-link:hover {
-    color: #cc0052;
+    color: var(--link-hover);
     text-decoration: underline;
 }
 
@@ -247,33 +265,33 @@ body {
 
 .project-card {
     padding: 16px 18px;
-    border: 1.5px solid #ff66b2;
+    border: 1.5px solid var(--white);
     border-radius: 6px;
-    background-color: #ffffff;
+    background-color: var(--white);
 }
 
 .project-title {
     font-size: 15px;
     font-weight: bold;
-    color: #333;
+    color: var(--ink);
     margin: 0 0 8px 0;
     line-height: 1.4;
 }
 
 .project-desc {
     font-size: 14px;
-    color: #555;
+    color: var(--ink-muted);
     line-height: 1.6;
     margin: 0 0 10px 0;
 }
 
 .project-collab {
     font-size: 13px;
-    color: #999;
+    color: var(--ink-faint);
     font-style: italic;
     margin: 0;
     padding-top: 8px;
-    border-top: 1px solid #f0e0ec;
+    border-top: 1px solid var(--pink-soft);
 }
 
 /* Sparkle Styling */
@@ -323,20 +341,21 @@ body {
 }
 
 .nav-link {
-    color: #ff66b2;
+    color: var(--white);
     text-decoration: none;
     cursor: pointer;
     font-weight: 700;
-    transition: color 0.2s;
+    transition: color 0.2s, opacity 0.2s;
+    text-shadow: 0 1px 0 rgba(63, 42, 49, 0.12);
 }
 
 .nav-link:hover {
-    color: #cc0052;
+    color: var(--white);
     text-decoration: underline;
 }
 
 .nav-active {
-    border-bottom: 2px solid #ff66b2;
+    border-bottom: 2px solid var(--white);
     cursor: default;
     pointer-events: none;
 }
@@ -346,41 +365,41 @@ body {
     margin: 25px 0 20px 0;
     text-align: center;
     padding: 18px 20px;
-    background: #fefefe;
-    border: 1.5px solid #ff66b2;
+    background: var(--white);
+    border: 1.5px solid var(--white);
     border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(255, 102, 178, 0.12);
+    box-shadow: 0 2px 8px rgba(63, 42, 49, 0.08);
     position: relative;
 }
 
 .quote-block::before {
     content: '"';
     font-size: 32px;
-    color: #ff66b2;
+    color: var(--pink);
     position: absolute;
     top: 10px;
     left: 16px;
     font-family: 'Century Schoolbook', serif;
     line-height: 1;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .quote-block::after {
     content: '"';
     font-size: 32px;
-    color: #ff66b2;
+    color: var(--pink);
     position: absolute;
     bottom: 10px;
     right: 16px;
     font-family: 'Century Schoolbook', serif;
     line-height: 1;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .quote-text {
     font-size: 15px;
     line-height: 1.5;
-    color: #444;
+    color: var(--ink);
     margin: 0 0 12px 0;
     font-style: italic;
     font-family: 'Century Schoolbook', serif;
@@ -389,7 +408,7 @@ body {
 
 .quote-attribution {
     font-size: 13px;
-    color: #777;
+    color: var(--ink-muted);
     font-weight: 500;
     margin: 0;
     font-family: 'Century Schoolbook', serif;
@@ -397,7 +416,7 @@ body {
 
 .quote-attribution::before {
     content: "— ";
-    color: #ff66b2;
+    color: var(--ink-faint);
 }
 
 /* Responsive adjustments for quote block */
@@ -463,6 +482,13 @@ body {
     .miffy-sticker-wrap, .miffy-sticker-left {
         display: block;
     }
+}
+
+.site-rule {
+    border: 0;
+    height: 2px;
+    background: var(--white);
+    margin: 10px 0;
 }
 
 

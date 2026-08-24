@@ -69,7 +69,7 @@ function createSparkle(x, y) {
     sparkle.style.left = sparkleX + 'px';
     sparkle.style.top = sparkleY + 'px';
 
-    const colors = ['#ffcce6', '#ffd6eb', '#ffe0f0', '#ffebf5', '#ffc0dd'];
+    const colors = ['#ffffff', '#fff7fa', '#ffeef4', '#ffffff', '#f8d6e0'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
     // Create diagonal sparkle elements
