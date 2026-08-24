@@ -131,19 +131,15 @@ body {
 
 .cv-link {
     color: var(--link);
-    background: var(--white);
     text-decoration: none;
     font-weight: bold;
-    font-size: 14px;
-    padding: 1px 8px;
-    border-radius: 999px;
-    vertical-align: middle;
-    transition: opacity 0.2s;
+    font-size: 16px;
+    transition: color 0.2s;
 }
 
 .cv-link:hover {
-    opacity: 0.82;
-    text-decoration: none;
+    color: var(--link-hover);
+    text-decoration: underline;
 }
 
 .about-section, .research-section, .experience-section {
