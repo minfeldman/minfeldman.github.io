@@ -105,7 +105,7 @@ body {
     width: 112px;
     height: 112px;
     object-fit: cover;
-    object-position: center 42%;
+    object-position: center;
     border-radius: 0;
     user-select: none;
     display: block;
