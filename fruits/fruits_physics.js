@@ -56,16 +56,8 @@ function updateSize() {
     }
 }
 
-// Listen for both window resize and container size changes
-window.addEventListener('resize', updateSize);
-
-// Use ResizeObserver to detect container size changes
-if (window.ResizeObserver) {
-    const resizeObserver = new ResizeObserver(() => {
-        updateSize();
-    });
-    resizeObserver.observe(box);
-}
+const resizeObserver = new ResizeObserver(updateSize);
+resizeObserver.observe(box);
 
 const scene = new THREE.Scene();
 scene.background = null;
