@@ -1,4 +1,4 @@
-const MIFFY_BOOK_TITLE = "The Houseguest";
+const MIFFY_BOOK_TITLE = "The Modularity of Mind";
 const API_BASE = "https://api.albertastrom.com";
 const CACHE_KEY = "miffy-book-v1";
 
